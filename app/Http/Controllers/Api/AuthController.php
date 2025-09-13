@@ -3,43 +3,31 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\Auth\LoginResource;
+use App\Services\Auth\LoginService;
+use App\Services\Auth\LogoutService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
     /**
      * Handle an authentication attempt.
+     * @throws ValidationException
      */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request, LoginService $loginService): LoginResource
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (! $user || ! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials do not match our records.'],
-            ]);
-        }
-
-        $token = $user->createToken('api-token')->plainTextToken;
-
-        return response()->json(['token' => $token]);
+        return new LoginResource($loginService->execute($request));
     }
 
     /**
      * Log the user out (Invalidate the token).
      */
-    public function logout(Request $request): JsonResponse
+    public function logout(Request $request, LogoutService $logoutService): JsonResponse
     {
-        $request->user()->currentAccessToken()->delete();
+        $logoutService->execute($request);
 
         return response()->json(['message' => 'Logged out successfully']);
     }
