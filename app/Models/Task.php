@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\TaskPriority;
+use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -14,8 +16,8 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property string $title
  * @property string|null $description
- * @property string $status
- * @property string $priority
+ * @property TaskStatus $status
+ * @property TaskPriority $priority
  * @property string|null $due_date
  * @property int|null $assigned_to
  * @property int $version
@@ -45,6 +47,8 @@ class Task extends Model
     protected $casts = [
         'due_date' => 'date',
         'metadata' => 'array',
+        'status' => TaskStatus::class,
+        'priority' => TaskPriority::class,
     ];
 
     public function assignee(): BelongsTo

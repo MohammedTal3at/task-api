@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
+use App\Enums\TaskLogOperationType;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $task_id
  * @property int $user_id
  * @property array $changes
- * @property string $operation_type
- * @property \Illuminate\Support\Carbon $created_at
- * @property-read \App\Models\Task $task
- * @property-read \App\Models\User $user
+ * @property TaskLogOperationType $operation_type
+ * @property Carbon $created_at
+ * @property-read Task $task
+ * @property-read User $user
  */
 class TaskLog extends Model
 {
@@ -32,6 +34,7 @@ class TaskLog extends Model
     protected $casts = [
         'changes' => 'array',
         'created_at' => 'datetime',
+        'operation_type' => TaskLogOperationType::class,
     ];
 
     public function task(): BelongsTo

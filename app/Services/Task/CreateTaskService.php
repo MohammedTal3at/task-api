@@ -3,8 +3,10 @@
 namespace App\Services\Task;
 
 use App\Dtos\CreateTaskDto;
+use App\Events\TaskCreated;
 use App\Models\Task;
 use App\Repositories\Contracts\TaskRepositoryInterface;
+use Illuminate\Support\Facades\Auth;
 
 class CreateTaskService
 {
@@ -16,6 +18,16 @@ class CreateTaskService
 
     public function execute(CreateTaskDto $dto): Task
     {
-        return $this->repository->create($dto);
+        $task = $this->repository->create($dto);
+
+        TaskCreated::dispatch(
+            $task->id,
+            $dto->creatorId,
+            now(),
+            [],
+            $task->getAttributes()
+        );
+
+        return $task;
     }
 }

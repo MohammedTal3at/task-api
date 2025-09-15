@@ -56,7 +56,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained(table: 'users' , indexName:'fk_task_log_user_id')->cascadeOnDelete();
             $table->json('changes');
             $table->timestamp('created_at')->useCurrent();
-            $table->enum('operation_type', ['created', 'updated', 'deleted', 'restored']);
+            $table->enum('operation_type', ['created', 'updated', 'deleted', 'restored', 'status_changed']);
         });
     }
 
