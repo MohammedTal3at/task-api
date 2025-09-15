@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\TagController;
 use App\Http\Controllers\Api\TaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -16,4 +17,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Task routes
     Route::post('tasks', [TaskController::class, 'create'])->middleware('role:admin');
+
+    // Tag routes
+    Route::apiResource('tags', TagController::class)->middleware('role:admin');
 });
