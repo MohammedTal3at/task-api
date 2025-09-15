@@ -24,6 +24,9 @@ return new class extends Migration
             $table->softDeletes();
             $table->integer('version')->default(1);
             $table->json('metadata')->nullable();
+
+            // Adding full-text index for title and description
+            $table->fullText(columns: ['title', 'description'], name: 'ftx_tasks_title_description');
         });
 
         // Tags table
@@ -49,8 +52,8 @@ return new class extends Migration
         // Task log table
         Schema::create('task_log', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('task_id')->constrained(table: 'task_log' , indexName:'fk_task_log_task_id')->cascadeOnDelete();
-            $table->foreignId('user_id')->constrained(table: 'task_log' , indexName:'fk_task_log_user_id')->cascadeOnDelete();
+            $table->foreignId('task_id')->constrained(table: 'tasks' , indexName:'fk_task_log_task_id')->cascadeOnDelete();
+            $table->foreignId('user_id')->constrained(table: 'users' , indexName:'fk_task_log_user_id')->cascadeOnDelete();
             $table->json('changes');
             $table->timestamp('created_at')->useCurrent();
             $table->enum('operation_type', ['created', 'updated', 'deleted', 'restored']);
