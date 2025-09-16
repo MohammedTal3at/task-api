@@ -169,4 +169,11 @@ class TaskRepository implements TaskRepositoryInterface
         $task->tags()->sync($tagIds);
         return $task->load(['tags:id,name', 'assignee:id,name']);
     }
+
+    public function canManageTask(int $taskId, int $userId): bool
+    {
+        return Task::where('id', $taskId)
+            ->where('assigned_to', $userId)
+            ->exists();
+    }
 }

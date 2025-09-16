@@ -29,9 +29,9 @@ class TaskController extends Controller
         return TaskResource::collection($service->execute($dto));
     }
 
-    public function show(int $taskId, ShowTaskService $service): TaskResource
+    public function show(int $taskId, Request $request, ShowTaskService $service): TaskResource
     {
-        $task = $service->execute($taskId);
+        $task = $service->execute($taskId, $request->user());
         return new TaskResource($task);
     }
 
@@ -63,7 +63,7 @@ class TaskController extends Controller
 
     public function toggleStatus(int $taskId, Request $request, ToggleTaskStatusService $service): TaskResource
     {
-        $updatedTask = $service->execute($taskId, $request->user()->id);
+        $updatedTask = $service->execute($taskId, $request->user());
 
         return new TaskResource($updatedTask);
     }

@@ -5,6 +5,7 @@ namespace App\Services\Task;
 use App\Enums\TaskStatus;
 use App\Events\TaskStatusToggled;
 use App\Models\Task;
+use App\Models\User;
 use App\Repositories\Contracts\TaskRepositoryInterface;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -15,8 +16,10 @@ readonly class ToggleTaskStatusService
     {
     }
 
-    public function execute(int $taskId, int $userId): Task
+    public function execute(int $taskId, User $user): Task
     {
+        $this->canUserManageTask($this->repository, $user, $taskId);
+
         $task = $this->repository->findById($taskId);
 
         if (!$task) {
@@ -35,7 +38,7 @@ readonly class ToggleTaskStatusService
 
         TaskStatusToggled::dispatch(
             $taskId,
-            $userId,
+            $user->id,
             Carbon::now(),
             ['status' => $oldStatus],
             ['status' => $nextStatus]
@@ -43,4 +46,6 @@ readonly class ToggleTaskStatusService
 
         return $updatedTask;
     }
+
+
 }

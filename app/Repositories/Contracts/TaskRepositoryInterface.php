@@ -23,4 +23,6 @@ interface TaskRepositoryInterface
     public function synTags(Task $task, array $tagIds): Task;
 
     public function updateStatus(int $taskId, TaskStatus $newStatus, int $expectedVersion): Task;
+
+    public function canManageTask(int $taskId, int $userId): bool;
 }

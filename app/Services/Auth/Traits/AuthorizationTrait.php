@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Services\Auth\Traits;
+
+use App\Enums\UserRole;
+use App\Models\User;
+use App\Repositories\Contracts\TaskRepositoryInterface;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
+trait AuthorizationTrait
+{
+    private function canUserManageTask(TaskRepositoryInterface $taskRepository, User $user, int $taskId): void
+    {
+        if ($user->isAdmin())
+            return;
+
+        if (!$taskRepository->canManageTask($user->id, $taskId)) {
+            throw new AccessDeniedHttpException('Not allowed to perform this action');
+        }
+    }
+}
