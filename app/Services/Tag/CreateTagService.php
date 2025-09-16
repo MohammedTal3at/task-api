@@ -6,9 +6,9 @@ use App\Dtos\CreateTagDto;
 use App\Models\Tag;
 use App\Repositories\Contracts\TagRepositoryInterface;
 
-class CreateTagService
+readonly class CreateTagService
 {
-    public function __construct(private readonly TagRepositoryInterface $repository)
+    public function __construct(private TagRepositoryInterface $repository)
     {
     }
 

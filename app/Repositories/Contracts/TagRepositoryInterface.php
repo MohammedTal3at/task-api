@@ -15,5 +15,5 @@ interface TagRepositoryInterface
 
     public function update(int $id, UpdateTagDto $dto): Tag;
 
-    public function delete(int $id): void;
+    public function delete(int $id): int;
 }

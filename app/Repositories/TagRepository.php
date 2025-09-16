@@ -24,12 +24,11 @@ class TagRepository implements TagRepositoryInterface
     {
         $tag = Tag::findOrFail($id);
         $tag->update(array_filter((array) $dto));
-
         return $tag;
     }
 
-    public function delete(int $id): void
+    public function delete(int $id): int
     {
-        Tag::findOrFail($id)->delete();
+        return Tag::where('id', $id)->delete();
     }
 }

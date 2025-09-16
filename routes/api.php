@@ -16,7 +16,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::post('logout', [AuthController::class, 'logout']);
 
     // Task routes
+    Route::get('tasks', [TaskController::class, 'index']);
+    Route::get('tasks/{task}', [TaskController::class, 'get']);
     Route::post('tasks', [TaskController::class, 'create'])->middleware('role:admin');
+    Route::put('tasks/{task}', [TaskController::class, 'update']);
+    Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->middleware('role:admin');
 
     // Tag routes
     Route::apiResource('tags', TagController::class)->middleware('role:admin');

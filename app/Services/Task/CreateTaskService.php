@@ -6,12 +6,11 @@ use App\Dtos\CreateTaskDto;
 use App\Events\TaskCreated;
 use App\Models\Task;
 use App\Repositories\Contracts\TaskRepositoryInterface;
-use Illuminate\Support\Facades\Auth;
 
-class CreateTaskService
+readonly class CreateTaskService
 {
     public function __construct(
-        protected TaskRepositoryInterface $repository
+        private TaskRepositoryInterface $repository
     )
     {
     }
@@ -24,7 +23,6 @@ class CreateTaskService
             $task->id,
             $dto->creatorId,
             now(),
-            [],
             $task->getAttributes()
         );
 

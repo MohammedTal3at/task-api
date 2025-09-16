@@ -5,6 +5,8 @@ namespace App\Listeners;
 use App\Dtos\CreateTaskLogDto;
 use App\Enums\TaskLogOperationType;
 use App\Events\TaskCreated;
+use App\Events\TaskDeleted;
+use App\Events\TaskUpdated;
 use App\Services\TaskLog\CreateTaskLogService;
 use Illuminate\Support\Facades\Log;
 
@@ -24,10 +26,9 @@ class TaskLogListener
     /**
      * Handle the event.
      */
-    public function handle(TaskCreated $event): void
+    public function handle(TaskCreated|TaskDeleted|TaskUpdated $event): void
     {
         $operationType = $this->getOperationType($event);
-
 
         if ($operationType) {
             $dto = new CreateTaskLogDto(
@@ -35,23 +36,23 @@ class TaskLogListener
                 userId: $event->userId,
                 operationType: $operationType,
                 changes: [
-                    'old' => $event->oldAttributes,
-                    'new' => $event->newAttributes,
+                    'old' => property_exists($event, 'oldAttributes') ? $event->oldAttributes : [],
+                    'new' => property_exists($event, 'newAttributes') ? $event->newAttributes : [],
                 ]
             );
 
             $this->createTaskLogService->execute($dto);
         } else {
-            Log::alert('Unhandled task log operation type.', $event);
+            Log::alert('Unhandled task log operation type.', (array) $event);
         }
     }
 
-    private function getOperationType(TaskCreated $event): ?TaskLogOperationType
+    private function getOperationType(TaskCreated|TaskDeleted|TaskUpdated $event): ?TaskLogOperationType
     {
-        $eventClass = get_class($event);
-
-        return match ($eventClass) {
+        return match (get_class($event)) {
             TaskCreated::class => TaskLogOperationType::CREATED,
+            TaskDeleted::class => TaskLogOperationType::DELETED,
+            TaskUpdated::class => TaskLogOperationType::UPDATED,
             default => null,
         };
     }

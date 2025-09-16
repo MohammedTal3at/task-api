@@ -39,9 +39,9 @@ class TagController extends Controller
         return new TagResource($tag);
     }
 
-    public function destroy(Tag $tag, DeleteTagService $service): Response
+    public function destroy(int $tagId, DeleteTagService $service): Response
     {
-        $service->execute($tag->id);
+        $service->execute($tagId);
 
         return response()->noContent();
     }

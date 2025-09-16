@@ -5,9 +5,9 @@ namespace App\Services\Tag;
 use App\Repositories\Contracts\TagRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
-class ListTagService
+readonly class ListTagService
 {
-    public function __construct(private readonly TagRepositoryInterface $repository)
+    public function __construct(private TagRepositoryInterface $repository)
     {
     }
 

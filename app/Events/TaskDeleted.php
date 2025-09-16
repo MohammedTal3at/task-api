@@ -7,23 +7,25 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Carbon;
 
-class TaskCreated
+class TaskDeleted
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public int $taskId;
     public int $userId;
     public Carbon $eventDate;
-    public array $newAttributes;
+
+    public array $oldAttributes;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(int $taskId, int $userId, Carbon $eventDate, array $newAttributes)
+    public function __construct(int $taskId, int $userId, Carbon $eventDate, array $oldAttributes)
     {
         $this->taskId = $taskId;
         $this->userId = $userId;
         $this->eventDate = $eventDate;
-        $this->newAttributes = $newAttributes;
+        $this->oldAttributes = $oldAttributes;
+
     }
 }

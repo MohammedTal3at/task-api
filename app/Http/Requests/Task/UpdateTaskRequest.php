@@ -6,10 +6,10 @@ use App\Enums\TaskPriority;
 use App\Enums\TaskStatus;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
-class CreateTaskRequest extends FormRequest
+class UpdateTaskRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,10 +27,10 @@ class CreateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'string', 'min:5'],
+            'title' => ['sometimes', 'string', 'min:5', Rule::unique('tasks')->ignore($this->route('task'))],
             'description' => ['nullable', 'string'],
-            'status' => ['nullable', Rule::in(array_column(TaskStatus::cases(), 'value'))],
-            'priority' => ['nullable', Rule::in(array_column(TaskPriority::cases(), 'value'))],
+            'status' => ['sometimes', Rule::in(array_column(TaskStatus::cases(), 'value'))],
+            'priority' => ['sometimes', Rule::in(array_column(TaskPriority::cases(), 'value'))],
             'due_date' => [
                 'nullable',
                 'date',
@@ -42,8 +42,7 @@ class CreateTaskRequest extends FormRequest
                         $fail('The due date cannot be in the past for tasks with pending or in-progress status.');
                     }
                 },
-            ],
-            'assigned_to' => ['nullable', 'exists:users,id'],
+            ], 'assigned_to' => ['nullable', 'exists:users,id'],
             'metadata' => ['nullable', 'array'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['integer', 'exists:tags,id'],
