@@ -19,9 +19,10 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::get('tasks', [TaskController::class, 'index']);
     Route::get('tasks/{task}', [TaskController::class, 'show']);
     Route::post('tasks', [TaskController::class, 'create'])->middleware('role:admin');
-    Route::put('tasks/{task}', [TaskController::class, 'update']);
-    Route::patch('tasks/{task}/restore', [TaskController::class, 'restore']);
-    Route::delete('tasks/{task}', [TaskController::class, 'destroy']);
+    Route::put('tasks/{task}', [TaskController::class, 'update'])->middleware('role:admin');
+    Route::patch('tasks/{task}/restore', [TaskController::class, 'restore'])->middleware('role:admin');
+    Route::patch('tasks/{task}/toggle-status', [TaskController::class, 'toggleStatus']);
+    Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->middleware('role:admin');
 
     // Tag routes
     Route::apiResource('tags', TagController::class)->middleware('role:admin');

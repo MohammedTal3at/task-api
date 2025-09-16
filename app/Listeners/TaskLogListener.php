@@ -7,6 +7,7 @@ use App\Enums\TaskLogOperationType;
 use App\Events\TaskCreated;
 use App\Events\TaskDeleted;
 use App\Events\TaskRestored;
+use App\Events\TaskStatusToggled;
 use App\Events\TaskUpdated;
 use App\Services\TaskLog\CreateTaskLogService;
 use Illuminate\Support\Facades\Log;
@@ -27,7 +28,7 @@ class TaskLogListener
     /**
      * Handle the event.
      */
-    public function handle(TaskCreated|TaskDeleted|TaskUpdated|TaskRestored $event): void
+    public function handle(TaskCreated|TaskDeleted|TaskUpdated|TaskRestored|TaskStatusToggled $event): void
     {
         $operationType = $this->getOperationType($event);
 
@@ -44,17 +45,18 @@ class TaskLogListener
 
             $this->createTaskLogService->execute($dto);
         } else {
-            Log::alert('Unhandled task log operation type.', (array) $event);
+            Log::alert('Unhandled task log operation type.', (array)$event);
         }
     }
 
-    private function getOperationType(TaskCreated|TaskDeleted|TaskUpdated|TaskRestored $event): ?TaskLogOperationType
+    private function getOperationType(TaskCreated|TaskDeleted|TaskUpdated|TaskRestored|TaskStatusToggled $event): ?TaskLogOperationType
     {
         return match (get_class($event)) {
             TaskCreated::class => TaskLogOperationType::CREATED,
             TaskDeleted::class => TaskLogOperationType::DELETED,
             TaskUpdated::class => TaskLogOperationType::UPDATED,
             TaskRestored::class => TaskLogOperationType::RESTORED,
+            TaskStatusToggled::class => TaskLogOperationType::STATUS_CHANGED,
             default => null,
         };
     }

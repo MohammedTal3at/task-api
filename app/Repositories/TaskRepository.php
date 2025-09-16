@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Dtos\CreateTaskDto;
 use App\Dtos\ListTasksDto;
 use App\Dtos\UpdateTaskDto;
+use App\Enums\TaskStatus;
 use App\Exceptions\ConcurrencyException;
 use App\Models\Task;
 use App\Repositories\Contracts\TaskRepositoryInterface;
@@ -100,27 +101,20 @@ class TaskRepository implements TaskRepositoryInterface
 
     /**
      * @throws ConcurrencyException
-     * @throws ModelNotFoundException
      */
     public function update(int $taskId, UpdateTaskDto $dto, int $expectedVersion): Task
     {
         $data = $dto->toBeUpdated();
 
-        // Add version increment to the update data
         $data['version'] = $expectedVersion + 1;
         $data['updated_at'] = Carbon::now();
 
-        // Update with optimistic lock check
         $updatedCount = Task::where('id', $taskId)
             ->where('version', $expectedVersion)
             ->update($data);
 
-        // Handle proper error exception
         if ($updatedCount === 0) {
-            if (!Task::where('id', $taskId)->exists()) {
-                throw new ModelNotFoundException("Task not found with ID: {$taskId}");
-            }
-            throw new ConcurrencyException("Task with ID: {$taskId} has been modified by another user.");
+            $this->handleUpdateFailure($taskId);
         }
 
         return Task::with(['tags:id,name', 'assignee:id,name'])->findOrFail($taskId);
@@ -137,5 +131,36 @@ class TaskRepository implements TaskRepositoryInterface
         $task->restore();
 
         return $task->load(['tags:id,name', 'assignee:id,name']);
+    }
+
+    /**
+     * @throws ConcurrencyException
+     */
+    public function updateStatus(int $taskId, TaskStatus $newStatus, int $expectedVersion): Task
+    {
+        $updatedCount = Task::where('id', $taskId)
+            ->where('version', $expectedVersion)
+            ->update([
+                'status' => $newStatus->value,
+                'version' => $expectedVersion + 1,
+                'updated_at' => Carbon::now(),
+            ]);
+
+        if ($updatedCount === 0) {
+            $this->handleUpdateFailure($taskId);
+        }
+
+        return Task::with(['tags:id,name', 'assignee:id,name'])->findOrFail($taskId);
+    }
+
+    /**
+     * @throws ConcurrencyException
+     */
+    private function handleUpdateFailure(int $taskId): void
+    {
+        if (!Task::where('id', $taskId)->exists()) {
+            throw new ModelNotFoundException("Task not found with ID: {$taskId}");
+        }
+        throw new ConcurrencyException("Task with ID: {$taskId} has been modified by another user.");
     }
 }

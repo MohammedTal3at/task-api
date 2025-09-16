@@ -15,6 +15,7 @@ use App\Services\Task\DeleteTaskService;
 use App\Services\Task\ListTasksService;
 use App\Services\Task\RestoreTaskService;
 use App\Services\Task\ShowTaskService;
+use App\Services\Task\ToggleTaskStatusService;
 use App\Services\Task\UpdateTaskService;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -58,5 +59,12 @@ class TaskController extends Controller
         $restoredTask = $service->execute($taskId, $request->user()->id);
 
         return new TaskResource($restoredTask);
+    }
+
+    public function toggleStatus(int $taskId, Request $request, ToggleTaskStatusService $service): TaskResource
+    {
+        $updatedTask = $service->execute($taskId, $request->user()->id);
+
+        return new TaskResource($updatedTask);
     }
 }
