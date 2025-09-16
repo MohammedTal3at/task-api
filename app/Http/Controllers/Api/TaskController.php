@@ -13,6 +13,7 @@ use App\Http\Resources\TaskResource;
 use App\Services\Task\CreateTaskService;
 use App\Services\Task\DeleteTaskService;
 use App\Services\Task\ListTasksService;
+use App\Services\Task\RestoreTaskService;
 use App\Services\Task\ShowTaskService;
 use App\Services\Task\UpdateTaskService;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class TaskController extends Controller
         return TaskResource::collection($service->execute($dto));
     }
 
-    public function get(int $taskId, ShowTaskService $service): TaskResource
+    public function show(int $taskId, ShowTaskService $service): TaskResource
     {
         $task = $service->execute($taskId);
         return new TaskResource($task);
@@ -50,5 +51,12 @@ class TaskController extends Controller
         $service->execute($taskId, $request->user()->id);
 
         return response()->noContent();
+    }
+
+    public function restore(int $taskId, Request $request, RestoreTaskService $service): TaskResource
+    {
+        $restoredTask = $service->execute($taskId, $request->user()->id);
+
+        return new TaskResource($restoredTask);
     }
 }

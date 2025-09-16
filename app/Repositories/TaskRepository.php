@@ -26,7 +26,8 @@ class TaskRepository implements TaskRepositoryInterface
             'priority' => $dto->priority,
             'due_date' => $dto->due_date,
             'assigned_to' => $dto->assigned_to,
-            'metadata' => $dto->metadata
+            'metadata' => $dto->metadata,
+            'version' => 1, // Initialize version for new tasks
         ]);
 
         if (!empty($dto->tags)) {
@@ -52,7 +53,7 @@ class TaskRepository implements TaskRepositoryInterface
         if ($dto->cursor) {
             return $query->cursorPaginate(perPage: $dto->perPage, cursor: $dto->cursor);
         } else {
-            return $query->paginate(perPage: $dto->perPage, page: $dto->cursor);
+            return $query->paginate(perPage: $dto->perPage, page: $dto->page);
         }
     }
 
@@ -125,9 +126,16 @@ class TaskRepository implements TaskRepositoryInterface
         return Task::with(['tags:id,name', 'assignee:id,name'])->findOrFail($taskId);
     }
 
-    public function synTags(Task $task, array $tagIds): Task
+    public function restore(int $taskId): Task
     {
-        $task->tags()->sync($tagIds);
+        $task = Task::withTrashed()->where('id', $taskId)->first();
+
+        if (!$task) {
+            throw new ModelNotFoundException("Task not found with ID: {$taskId}");
+        }
+
+        $task->restore();
+
         return $task->load(['tags:id,name', 'assignee:id,name']);
     }
 }

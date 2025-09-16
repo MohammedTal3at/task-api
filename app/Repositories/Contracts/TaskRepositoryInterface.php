@@ -18,7 +18,5 @@ interface TaskRepositoryInterface
     public function getPaginated(ListTasksDto $dto): LengthAwarePaginator|CursorPaginator;
 
     public function update(int $taskId, UpdateTaskDto $dto, int $expectedVersion): Task;
-
-    public function synTags(Task $task, array $tagIds): Task;
-
+    public function restore(int $taskId): Task;
 }

@@ -17,10 +17,11 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Task routes
     Route::get('tasks', [TaskController::class, 'index']);
-    Route::get('tasks/{task}', [TaskController::class, 'get']);
+    Route::get('tasks/{task}', [TaskController::class, 'show']);
     Route::post('tasks', [TaskController::class, 'create'])->middleware('role:admin');
     Route::put('tasks/{task}', [TaskController::class, 'update']);
-    Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->middleware('role:admin');
+    Route::patch('tasks/{task}/restore', [TaskController::class, 'restore']);
+    Route::delete('tasks/{task}', [TaskController::class, 'destroy']);
 
     // Tag routes
     Route::apiResource('tags', TagController::class)->middleware('role:admin');

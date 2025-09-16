@@ -6,6 +6,7 @@ use App\Dtos\CreateTaskLogDto;
 use App\Enums\TaskLogOperationType;
 use App\Events\TaskCreated;
 use App\Events\TaskDeleted;
+use App\Events\TaskRestored;
 use App\Events\TaskUpdated;
 use App\Services\TaskLog\CreateTaskLogService;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +27,7 @@ class TaskLogListener
     /**
      * Handle the event.
      */
-    public function handle(TaskCreated|TaskDeleted|TaskUpdated $event): void
+    public function handle(TaskCreated|TaskDeleted|TaskUpdated|TaskRestored $event): void
     {
         $operationType = $this->getOperationType($event);
 
@@ -47,12 +48,13 @@ class TaskLogListener
         }
     }
 
-    private function getOperationType(TaskCreated|TaskDeleted|TaskUpdated $event): ?TaskLogOperationType
+    private function getOperationType(TaskCreated|TaskDeleted|TaskUpdated|TaskRestored $event): ?TaskLogOperationType
     {
         return match (get_class($event)) {
             TaskCreated::class => TaskLogOperationType::CREATED,
             TaskDeleted::class => TaskLogOperationType::DELETED,
             TaskUpdated::class => TaskLogOperationType::UPDATED,
+            TaskRestored::class => TaskLogOperationType::RESTORED,
             default => null,
         };
     }
