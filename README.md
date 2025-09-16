@@ -1,61 +1,207 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Task Management API
 
-## About Laravel
+A RESTful API for managing tasks, built with **Laravel 12**.  
+This project features a clean, service-oriented architecture, token-based authentication with Laravel Sanctum, and role-based access control.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+The application is fully containerized using **Laravel Sail** and Docker, allowing for a consistent and simple setup process on any machine.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Features
 
-## Learning Laravel
+- **Full CRUD Operations:** Create, read, update, and delete functionality for Tasks and Tags.
+- **Token-Based Authentication:** Secure user authentication using Laravel Sanctum API tokens.
+- **Role-Based Authorization:** Certain endpoints are protected and accessible only by users with an admin role.
+- **Advanced Task Filtering:** Rich query parameters supported for task listing:
+    - Filter by multiple statuses, priorities, assignees, and tags.
+    - Filter by a due date range.
+    - Full-text search on task titles and descriptions.
+- **Sorting & Pagination:** Supports both page-based and cursor-based pagination.
+- **Optimistic Concurrency Control:** Prevents data conflicts when multiple users update the same task simultaneously.
+- **Service-Oriented Architecture:** Business logic separated into service classes and DTOs for maintainability and testability.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- **Backend:** Laravel 12, PHP 8.4
+- **Database:** MySQL 8.0
+- **Web Server:** Nginx
+- **Containerization:** Docker & Laravel Sail
+- **Database Management:** phpMyAdmin (http://localhost:8888 by default)
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 🚀 Getting Started
 
-### Premium Partners
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) must be installed and running.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Installation
 
-## Contributing
+The project includes an automated setup script.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+git clone <repository>
+cd <repository>
+chmod +x setup.sh
+./setup.sh
+```
 
-## Code of Conduct
+This script will:
+- Copy `.env.example` to `.env`
+- Build and start the required Docker containers (Laravel, MySQL, phpMyAdmin)
+- Install all Composer dependencies
+- Generate a new application key
+- Run database migrations
+- Seed the database with initial data (users, tags, etc.)
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Once finished, the API will be accessible at:  
+**http://localhost** (or your configured `APP_PORT`).
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## API Endpoints
 
-## License
+### Authentication
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Method | Endpoint     | Description                                      |
+|--------|-------------|--------------------------------------------------|
+| POST   | /api/login  | Authenticates a user and returns an API token     |
+| POST   | /api/logout | Revokes the user’s current token (Requires Auth)  |
+
+**Login Request (Admin):**
+```json
+{ "email": "admin@example.com", "password": "password" }
+```
+
+**Login Request (Regular User):**
+```json
+{ "email": "user_1@example.com", "password": "password" }
+```
+**Login Response (Regular User):**
+```json
+{
+    "data": {
+        "token": "7|34mRlFh2U3uHIkCOA7rAFNDcIKH5daUOfbwj6XPBde40cc66",
+        "name": "User_1",
+        "role": "user"
+    }
+}
+```
+
+Include token in the `Authorization` header for protected routes:
+```
+Authorization: Bearer <token>
+```
+
+---
+
+### Tasks
+
+| Method | Endpoint                  | Description                    | Authorization |
+|--------|---------------------------|--------------------------------|---------------|
+| GET    | /api/tasks                | Get a paginated list of tasks  | User          |
+| POST   | /api/tasks                | Create a new task              | Admin         |
+| GET    | /api/tasks/{task}         | Get a single task by ID        | User          |
+| PUT    | /api/tasks/{task}         | Update a task                  | Admin         |
+| DELETE | /api/tasks/{task}         | Delete a task                  | Admin         |
+| PATCH  | /api/tasks/{task}/toggle-status | Toggle a task’s status | User          |
+| PATCH  | /api/tasks/{task}/restore | Restore a soft-deleted task    | Admin         |
+
+**Create Task (POST /api/tasks):**
+```json
+{
+  "title": "Design new API documentation structure",
+  "description": "Create a new, more detailed README and Swagger/OpenAPI spec.",
+  "priority": "high",
+  "due_date": "2025-10-15",
+  "assigned_to": 2,
+  "tags": [1, 3]
+}
+```
+
+**Update Task (PUT /api/tasks/{task}):**
+> Note: Include the `version` field to prevent concurrency issues.
+```json
+{
+  "status": "in_progress",
+  "assigned_to": 3,
+  "tags": [1, 2],
+  "version": 1
+}
+```
+
+---
+
+### Tags
+
+| Method | Endpoint         | Description                 | Authorization |
+|--------|-----------------|-----------------------------|---------------|
+| GET    | /api/tags       | List all tags               | Admin         |
+| POST   | /api/tags       | Create a new tag            | Admin         |
+| GET    | /api/tags/{tag} | Get a single tag by ID      | Admin         |
+| PUT    | /api/tags/{tag} | Update a tag                | Admin         |
+| DELETE | /api/tags/{tag} | Delete a tag                | Admin         |
+
+**Create Tag (POST /api/tags):**
+```json
+{ "name": "Frontend", "color": "#3490DC" }
+```
+
+**Update Tag (PUT /api/tags/{tag}):**
+```json
+{ "name": "Frontend Team", "color": "#227DC7" }
+```
+
+---
+
+## Advanced Task Listing
+
+The `GET /api/tasks` endpoint supports extensive filtering, sorting, and pagination.
+
+### Filtering
+- Example:
+  ```
+  /api/tasks?status=open,in_progress&tags=1,2
+  ```
+- **Date Range:**
+    - `due_date_start` (Y-m-d)
+    - `due_date_end` (Y-m-d)
+- **Keyword Search:**
+    - `keyword` (string, min 3 characters) → searches titles and descriptions.
+
+### Sorting
+- `sort_by`: created_at, due_date, priority, title (default: created_at)
+- `sort_order`: asc, desc
+
+Example:
+```
+/api/tasks?sort_by=due_date&sort_order=asc
+```
+
+### Pagination
+
+**Page-based (default):**
+- `page` (default: 1)
+- `per_page` (default: 15, max: 100)
+
+**Cursor-based:**
+1. Request with `cursor` parameter. → response includes `next_cursor`.
+2. Use `next_cursor` in the next request.
+3. Continue until `next_cursor` is `null`.
+
+_Example Flow:_
+1. `GET /api/tasks?per_page=10&cursor=true`
+2. Response → `meta: { "next_cursor": "eyJpZCI6MTB9" }`
+3. `GET /api/tasks?per_page=10&cursor=eyJpZCI6MTB9`
+
+---
+
+## 🧪 Running Tests
+
+Run the test suite:
+```bash
+./vendor/bin/sail test
+```

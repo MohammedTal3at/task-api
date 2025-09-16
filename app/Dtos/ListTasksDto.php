@@ -45,7 +45,7 @@ readonly class ListTasksDto
             keyword: $data['keyword'] ?? null,
             sortBy: $data['sort_by'] ?? null,
             sortOrder: $data['sort_order'] ?? null,
-            perPage: $data['per_page'] ?? 15,
+            perPage: $data['per_page'] ? min($data['per_page'], 15) : 15,
             page: $data['page'] ?? null,
             cursor: $data['cursor'] ?? null,
         );

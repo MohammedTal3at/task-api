@@ -2,7 +2,6 @@
 
 namespace App\Services\Auth\Traits;
 
-use App\Enums\UserRole;
 use App\Models\User;
 use App\Repositories\Contracts\TaskRepositoryInterface;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;

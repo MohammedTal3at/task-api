@@ -27,7 +27,7 @@ class UpdateTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['sometimes', 'string', 'min:5', Rule::unique('tasks')->ignore($this->route('task'))],
+            'title' => ['sometimes', 'string', 'min:5'],
             'description' => ['nullable', 'string'],
             'status' => ['sometimes', Rule::in(array_column(TaskStatus::cases(), 'value'))],
             'priority' => ['sometimes', Rule::in(array_column(TaskPriority::cases(), 'value'))],

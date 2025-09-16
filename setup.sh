@@ -75,6 +75,14 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Step 7: Run database seeders
+print_info "Running database seeders..."
+$SAIL_CMD artisan db:seed
+if [ $? -ne 0 ]; then
+    print_error "Database seeders failed."
+    exit 1
+fi
+
 
 print_success "Setup complete! Your Laravel application is running."
 print_info "You can access it at http://localhost:8008". (Replace 8008 with your APP_PORT if different)
