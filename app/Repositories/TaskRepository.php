@@ -163,4 +163,10 @@ class TaskRepository implements TaskRepositoryInterface
         }
         throw new ConcurrencyException("Task with ID: {$taskId} has been modified by another user.");
     }
+
+    public function synTags(Task $task, array $tagIds): Task
+    {
+        $task->tags()->sync($tagIds);
+        return $task->load(['tags:id,name', 'assignee:id,name']);
+    }
 }

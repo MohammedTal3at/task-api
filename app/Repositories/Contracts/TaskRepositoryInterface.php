@@ -20,7 +20,7 @@ interface TaskRepositoryInterface
 
     public function update(int $taskId, UpdateTaskDto $dto, int $expectedVersion): Task;
 
-    public function restore(int $taskId): Task;
+    public function synTags(Task $task, array $tagIds): Task;
 
     public function updateStatus(int $taskId, TaskStatus $newStatus, int $expectedVersion): Task;
 }
