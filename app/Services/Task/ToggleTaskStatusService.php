@@ -7,11 +7,14 @@ use App\Events\TaskStatusToggled;
 use App\Models\Task;
 use App\Models\User;
 use App\Repositories\Contracts\TaskRepositoryInterface;
+use App\Services\Auth\Traits\AuthorizationTrait;
 use Illuminate\Support\Carbon;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 readonly class ToggleTaskStatusService
 {
+    use AuthorizationTrait;
+
     public function __construct(private TaskRepositoryInterface $repository)
     {
     }

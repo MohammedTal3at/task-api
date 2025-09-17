@@ -13,7 +13,7 @@ trait AuthorizationTrait
         if ($user->isAdmin())
             return;
 
-        if (!$taskRepository->canManageTask($user->id, $taskId)) {
+        if (!$taskRepository->canManageTask($taskId, $user->id)) {
             throw new AccessDeniedHttpException('Not allowed to perform this action');
         }
     }

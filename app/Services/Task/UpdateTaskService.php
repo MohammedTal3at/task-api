@@ -53,12 +53,14 @@ readonly class UpdateTaskService
     }
 
     /**
+     * Validate that the due date shouldn't be in the past for pending or in-progress, except the status will be updated to completed as well
+     *
      * @throws ValidationException
      */
     private function validateDueDate(Task $task, UpdateTaskDto $dto): void
     {
         $dueDate = Carbon::parse($dto->due_date);
-        if ($dueDate->isPast() && in_array($task->status, [TaskStatus::PENDING, TaskStatus::IN_PROGRESS]))
+        if ($dueDate->isPast() && in_array($task->status, [TaskStatus::PENDING, TaskStatus::IN_PROGRESS]) && $dto->status != TaskStatus::COMPLETED)
         {
             throw ValidationException::withMessages([
                 'due_date' => 'The due date cannot be in the past for tasks with pending or in-progress status.'
