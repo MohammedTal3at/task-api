@@ -7,12 +7,12 @@ use App\Models\User;
 use App\Models\Tag;
 use App\Enums\UserRole;
 use App\Enums\TaskStatus;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
 class ListTasksTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseMigrations;
 
     public function test_admin_can_list_all_tasks_from_all_users(): void
     {
@@ -93,7 +93,7 @@ class ListTasksTest extends TestCase
         $taskLater = Task::factory()->create(['due_date' => now()->addDays(5)]);
 
         // Act
-        $response = $this->actingAs($admin)->getJson('api/tasks?'. http_build_query(['sort_by' => 'due_date', 'sort_order' => 'asc']));
+        $response = $this->actingAs($admin)->getJson('api/tasks?' . http_build_query(['sort_by' => 'due_date', 'sort_order' => 'asc']));
 
         // Assert
         $response->assertOk();
@@ -108,7 +108,7 @@ class ListTasksTest extends TestCase
         Task::factory(5)->create();
 
         // Act
-        $initialResponse = $this->actingAs($admin)->getJson('api/tasks?'.http_build_query(['per_page' => 2, 'cursor' => true]));
+        $initialResponse = $this->actingAs($admin)->getJson('api/tasks?' . http_build_query(['per_page' => 2, 'cursor' => true]));
         $cursor = $initialResponse->json('meta.next_cursor');
 
         // Act again
@@ -136,7 +136,7 @@ class ListTasksTest extends TestCase
         Task::factory(5)->create();
 
         // Act
-        $response = $this->actingAs($admin)->getJson('api/tasks?'.http_build_query(['per_page' => 2]));
+        $response = $this->actingAs($admin)->getJson('api/tasks?' . http_build_query(['per_page' => 2]));
 
         // Assert
         $response->assertOk();
@@ -152,6 +152,39 @@ class ListTasksTest extends TestCase
             ],
         ]);
         $response->assertJsonMissingPath('meta.next_cursor');
+    }
+
+    public function test_filtering_by_keyword_works_correctly(): void
+    {
+        // Arrange
+        $admin = User::factory()->create(['role' => UserRole::ADMIN]);
+        $matchingTask1 = Task::factory()->create([
+            'title' => 'Fix database indexing issue',
+            'description' => 'This involves fulltext search optimization',
+        ]);
+        $matchingTask2 = Task::factory()->create([
+            'title' => 'Migration plan',
+            'description' => 'Optimize database queries for search performance',
+        ]);
+        $nonMatchingTask = Task::factory()->create([
+            'title' => 'Frontend UI update',
+            'description' => 'Improve button styling',
+        ]);
+
+        // Act
+        $response = $this->actingAs($admin)
+            ->getJson('api/tasks?keyword=database');
+
+        // Assert
+        $response->assertOk();
+        $response->assertJsonCount(2, 'data');
+
+        $returnedTaskIds = collect($response->json('data'))->pluck('id');
+
+        $this->assertTrue($returnedTaskIds->contains($matchingTask1->id));
+        $this->assertTrue($returnedTaskIds->contains($matchingTask2->id));
+        $this->assertFalse($returnedTaskIds->contains($nonMatchingTask->id));
 
     }
+
 }
